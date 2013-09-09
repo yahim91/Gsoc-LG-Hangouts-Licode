@@ -80,7 +80,6 @@ exports.WebRtcController = function () {
         sdp = sdp.replace(reg2, '\n');
 
         return sdp;
-
     };
 
     /*
@@ -212,6 +211,9 @@ exports.WebRtcController = function () {
             delete subscribers[streamId];
             delete publishers[streamId];
         }
+    };
+    that.checkPublisherId = function (id) {
+        return (publishers[id] === undefined);
     };
 
     return that;

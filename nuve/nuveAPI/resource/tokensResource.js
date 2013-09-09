@@ -110,7 +110,7 @@ var generateToken = function (callback) {
                 return;
             }
 
-            token.host = ec.ip + ':8080';
+            token.host = ec.ip + ':8085';
 
             tokenRegistry.addToken(token, function (id) {
 

@@ -135,6 +135,12 @@ Erizo.Room = function (spec) {
             }
         });
 
+        that.socket.on('onAttributesChanged', function(arg) {
+            var stream = that.remoteStreams[arg.id],
+                evt = Erizo.StreamEvent({type: 'attributes-changed', msg: arg.attributes});
+            stream.dispatchEvent(evt);
+        });
+
         // First message with the token
         sendMessageSocket('token', token, callback, error);
     };
@@ -346,6 +352,13 @@ Erizo.Room = function (spec) {
         }
 
         return streams;
+    };
+
+    that.changeAttributesForStream = function (streamID, attributes) {
+        if (that.localStreams[streamID]) {
+            that.localStreams[streamID].attributes = attributes;
+            sendMessageSocket('modify_attributes', {id: streamID, attributes: attributes});
+        }
     };
 
     return that;

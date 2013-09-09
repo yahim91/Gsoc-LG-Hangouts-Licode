@@ -3,7 +3,7 @@ var crypto = require('crypto');
 var rpc = require('./rpc/rpc');
 var controller = require('./webRtcController');
 var ST = require('./Stream');
-var io = require('socket.io').listen(8080);
+var io = require('socket.io').listen(8085);
 var config = require('./../../licode_config');
 
 io.set('log level', 1);
@@ -240,7 +240,14 @@ var listen = function () {
             var id, st;
             if (options.state !== 'data') {
                 if (options.state === 'offer' && socket.state === 'sleeping') {
-                    id = Math.random() * 100000000000000000;
+                    if (options.attributes.type === 'video') {
+                        id = options.attributes.userid;
+                    } else {
+                        id = Math.random() * 100000000000000000;
+                    }
+                    while (!socket.room.webRtcController.checkPublisherId(id)) {
+                        id = id.concat(parseInt((Math.random() * 10), 10) + '');
+                    }
                     socket.room.webRtcController.addPublisher(id, sdp, function (answer) {
                         socket.state = 'waitingOk';
                         answer = answer.replace(privateRegexp, publicIP);
@@ -365,7 +372,17 @@ var listen = function () {
                 console.log('Empty room ', socket.room.id, '. Deleting it');
                 delete rooms[socket.room.id];
                 updateMyState();
+
             }
+        });
+        
+        //modify the attributes for a stream
+        socket.on('modify_attributes', function (msg) {
+            if (socket.room.streams[msg.id] === undefined) {
+                return;
+            }
+            socket.room.streams[msg.id].setAttributes(msg.attributes);
+            sendMsgToRoom(socket.room, 'onAttributesChanged', {id: msg.id, attributes: msg.attributes});
         });
     });
 };
@@ -376,7 +393,8 @@ var listen = function () {
  */
 exports.getUsersInRoom = function (room, callback) {
     "use strict";
-
+    console.log('getUsersInRoom ' + room + ' ' + JSON.stringify(rooms));
+    //console.log('sockets : ' + JSON.stringify(io.sockets));
     var users = [], sockets, id;
     if (rooms[room] === undefined) {
         callback(users);
@@ -390,7 +408,6 @@ exports.getUsersInRoom = function (room, callback) {
             users.push(io.sockets.socket(sockets[id]).user);
         }
     }
-
     callback(users);
 };
 

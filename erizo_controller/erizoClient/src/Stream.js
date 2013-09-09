@@ -12,6 +12,7 @@ Erizo.Stream = function (spec) {
     that.room = undefined;
     that.showing = false;
     that.local = false;
+    that.attributes = spec.attributes;
     that.video = spec.video;
     that.audio = spec.audio;
     that.screen = spec.screen;
@@ -26,7 +27,7 @@ Erizo.Stream = function (spec) {
     };
 
     that.getAttributes = function () {
-        return spec.attributes;
+        return that.attributes;
     };
 
     // Indicates if the stream has audio activated
@@ -58,13 +59,11 @@ Erizo.Stream = function (spec) {
         try {
             if (spec.audio || spec.video || spec.screen) {
                 L.Logger.debug("Requested access to local media");
-                var opt = {video: spec.video, audio: spec.audio};
+                var opt = {video: spec.video ? {mandatory: {minWidth: 1280, minHeight: 720}} : false, audio: spec.audio};
                 if (spec.screen) {
                     opt = {video:{mandatory: {chromeMediaSource: 'screen'}}};
                 }
                 Erizo.GetUserMedia(opt, function (stream) {
-                //navigator.webkitGetUserMedia("audio, video", function (stream) {
-
                     L.Logger.info("User has granted access to local media.");
                     that.stream = stream;
 

@@ -33,6 +33,10 @@ exports.Stream = function (spec) {
         return spec.attributes;
     };
 
+    that.setAttributes = function (attributes) {
+        spec.attributes = attributes;
+    };
+
     that.getDataSubscribers = function () {
         return dataSubscribers;
     };
