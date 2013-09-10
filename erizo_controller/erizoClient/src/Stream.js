@@ -61,7 +61,11 @@ Erizo.Stream = function (spec) {
                 L.Logger.debug("Requested access to local media");
                 var opt = {video: spec.video ? {mandatory: {minWidth: 1280, minHeight: 720}} : false, audio: spec.audio};
                 if (spec.screen) {
-                    opt = {video:{mandatory: {chromeMediaSource: 'screen'}}};
+                    if (spec.screen.orientation == 'portrait') {
+                        opt = {video:{mandatory: {chromeMediaSource: 'screen', maxWidth: 1080, maxHeight: 1920}}};
+                    } else {
+                        opt = {video:{mandatory: {chromeMediaSource: 'screen', maxWidth: 1920, maxHeight: 1080}}};
+                    }
                 }
                 Erizo.GetUserMedia(opt, function (stream) {
                     L.Logger.info("User has granted access to local media.");
